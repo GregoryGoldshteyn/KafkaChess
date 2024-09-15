@@ -26,6 +26,7 @@ public class MessageHelper{
 		);
 
 	// Messages that the client tells the server
+	public static final String REQUEST_NEW_GAME = "R";
 	public static final String LOADED = "L";
 	public static final String CONCEDED = "C";
 	public static final String DISCONNECTED = "D";
@@ -34,6 +35,7 @@ public class MessageHelper{
 	public static final String DID_NOT_UNDERSTAND_MESSAGE = "X";
 
 	public static final Set<String> clientMessages = Set.of(
+			REQUEST_NEW_GAME,
 			LOADED,
 			CONCEDED,
 			DISCONNECTED,
