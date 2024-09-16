@@ -7,9 +7,9 @@ import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Predicate;
-import org.apache.kafka.streams.processor.Processor;
-import org.apache.kafka.streams.processor.ProcessorContext;
-import org.apache.kafka.streams.processor.ProcessorSupplier;
+import org.apache.kafka.streams.processor.api.Processor;
+import org.apache.kafka.streams.processor.api.ProcessorContext;
+import org.apache.kafka.streams.processor.api.ProcessorSupplier;
 
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
@@ -42,31 +42,9 @@ public class Main{
 					}	
 				});
 
-		serverOutputStream.process(new ProcessorSupplier<String, String>(){
-					@Override
-					public Processor<String, String> get(){
-						return new Processor<String, String>(){
-							@Override
-							public void process(String k, String v){
-								System.out.println(k);
-								System.out.println(v);
-							}
-
-							@Override
-							public void close()
-							{
-
-							}
-							@Override
-							public void init(ProcessorContext c)
-							{
-
-							}
-						};
-					}
-			});
-		final Topology topology = builder.build();
+		serverOutputStream.process(new ClientProcessorSupplier(gameID));
 		
+		final Topology topology = builder.build();
         	final KafkaStreams streams = new KafkaStreams(topology, props);
         	final CountDownLatch latch = new CountDownLatch(1);
 		
