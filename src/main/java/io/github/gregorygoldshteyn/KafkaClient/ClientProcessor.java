@@ -1,4 +1,4 @@
-package io.github.gregorygoldshteyn.kafka.chess;
+package io.github.gregorygoldshteyn.kafka.chess.client;
 
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.kstream.KStream;
@@ -6,6 +6,8 @@ import org.apache.kafka.streams.processor.api.Processor;
 import org.apache.kafka.streams.processor.api.ProcessorContext;
 import org.apache.kafka.streams.processor.api.ProcessorSupplier;
 import org.apache.kafka.streams.processor.api.Record;
+
+import io.github.gregorygoldshteyn.kafka.chess.MessageHelper;
 
 public class ClientProcessor implements Processor<String, String, String, String>{
 	public void parseServerCommand(String serverMessage){
@@ -86,6 +88,6 @@ public class ClientProcessor implements Processor<String, String, String, String
 	}
 
 	public void process(Record<String, String> record){
-
+		parseServerCommand(record.value());
 	}
 }

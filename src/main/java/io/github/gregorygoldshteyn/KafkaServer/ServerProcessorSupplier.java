@@ -1,4 +1,4 @@
-package io.github.gregorygoldshteyn.kafka.chess;
+package io.github.gregorygoldshteyn.kafka.chess.server;
 
 import org.apache.kafka.streams.processor.api.Processor;
 import org.apache.kafka.streams.processor.api.ProcessorContext;

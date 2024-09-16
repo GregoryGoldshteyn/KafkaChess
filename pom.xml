@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.github.gregorygoldshteyn</groupId>
-    <artifactId>samplejar</artifactId>
+    <artifactId>kafka-chess</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
 
@@ -64,16 +64,45 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.4.2</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addClasspath>true</addClasspath>
-                            <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>io.github.gregorygoldshteyn.kafka.chess.Main</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
+		<version>3.4.2</version>
+		<executions>
+			<execution>
+				<id>client</id>
+				<phase>package</phase>
+				<goals>
+					<goal>jar</goal>
+				</goals>
+				<configuration>
+					<classifier>client</classifier>
+					<finalName>${project.artifactId}</finalName>
+                    			<archive>
+                        			<manifest>
+                            				<addClasspath>true</addClasspath>
+                            				<classpathPrefix>lib/</classpathPrefix>
+                            				<mainClass>io.github.gregorygoldshteyn.kafka.chess.client.Main</mainClass>
+                        			</manifest>
+                    				</archive>
+                		</configuration>
+			</execution>
+			<execution>
+				<id>server</id>
+				<phase>package</phase>
+				<goals>
+					<goal>jar</goal>
+				</goals>
+				<configuration>
+					<classifier>server</classifier>
+					<finalName>${project.artifactId}</finalName>
+                    			<archive>
+                        			<manifest>
+                            				<addClasspath>true</addClasspath>
+                            				<classpathPrefix>lib/</classpathPrefix>
+                            				<mainClass>io.github.gregorygoldshteyn.kafka.chess.server.Main</mainClass>
+                        			</manifest>
+                    				</archive>
+                		</configuration>
+			</execution>
+		</executions>
             </plugin>
         </plugins>
     </build>

@@ -1,4 +1,4 @@
-package io.github.gregorygoldshteyn.kafka.chess.client;
+package io.github.gregorygoldshteyn.kafka.chess.server;
 
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
@@ -17,7 +17,7 @@ import java.util.concurrent.CountDownLatch;
 public class Main{
 	public static Properties initProperties(){
 		Properties props = new Properties();
-        	props.put(StreamsConfig.APPLICATION_ID_CONFIG, "streams-chess-client");
+        	props.put(StreamsConfig.APPLICATION_ID_CONFIG, "streams-chess-server");
         	props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         	props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
         	props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());
@@ -31,18 +31,9 @@ public class Main{
 		final StreamsBuilder builder = new StreamsBuilder();
 		final Properties props = initProperties();
 
-		KStream<String, String> serverOutputStream = builder.<String, String>stream(serverOutput)
-			.filter(new Predicate<String, String>(){
-					@Override
-				 	public boolean test(String k, String v){
-						if(k.equals(gameID)){
-							return true;
-						}
-						return false;
-					}	
-				});
+		KStream<String, String> playerInputStream = builder.<String, String>stream(playerInput);
 
-		serverOutputStream.process(new ClientProcessorSupplier());
+		playerInputStream.process(new ServerProcessorSupplier());
 		
 		final Topology topology = builder.build();
         	final KafkaStreams streams = new KafkaStreams(topology, props);
