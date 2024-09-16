@@ -1,6 +1,7 @@
 package io.github.gregorygoldshteyn.kafka.chess.client;
 
 import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
@@ -11,8 +12,11 @@ import org.apache.kafka.streams.processor.api.Processor;
 import org.apache.kafka.streams.processor.api.ProcessorContext;
 import org.apache.kafka.streams.processor.api.ProcessorSupplier;
 
+import java.util.ArrayList;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
+
+import io.github.gregorygoldshteyn.kafka.chess.Game;
 
 public class Main{
 	public static Properties initProperties(){
@@ -25,18 +29,25 @@ public class Main{
 	}
 
 	public static void main(String[] args){
-		final String gameID = "1234";
+		String playerID = "testId";
+		if(args.length > 0){
+			playerID = args[0];
+		}
 		final String serverOutput = "streams-server-output";
 		final String playerInput = "streams-player-input";
 		final StreamsBuilder builder = new StreamsBuilder();
-		final Properties props = initProperties();
+		final ArrayList<Game> games = new ArrayList<Game>();
+		final Properties props = initProperties();	
+		final ClientProducer clientProducer = new ClientProducer(props, playerInput, playerID);
 
 		KStream<String, String> serverOutputStream = builder.<String, String>stream(serverOutput)
 			.filter(new Predicate<String, String>(){
 					@Override
 				 	public boolean test(String k, String v){
-						if(k.equals(gameID)){
-							return true;
+						for(Game game : games){
+							if(k.equals(game.gameID)){
+								return true;
+							}
 						}
 						return false;
 					}	
@@ -54,6 +65,7 @@ public class Main{
             		@Override
             		public void run() {
                 		streams.close();
+				clientProducer.close();
                 		latch.countDown();
             		}
         	});
