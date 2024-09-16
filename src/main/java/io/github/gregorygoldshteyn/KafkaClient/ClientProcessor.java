@@ -8,12 +8,6 @@ import org.apache.kafka.streams.processor.api.ProcessorSupplier;
 import org.apache.kafka.streams.processor.api.Record;
 
 public class ClientProcessor implements Processor<String, String, String, String>{
-	public String gameID;
-
-	public ClientProcessor(String gameID){
-		this.gameID = gameID;
-	}
-
 	public void parseServerCommand(String serverMessage){
 		String[] tokens = serverMessage.split("\\s+");
 		

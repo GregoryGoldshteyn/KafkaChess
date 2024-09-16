@@ -42,7 +42,7 @@ public class Main{
 					}	
 				});
 
-		serverOutputStream.process(new ClientProcessorSupplier(gameID));
+		serverOutputStream.process(new ClientProcessorSupplier());
 		
 		final Topology topology = builder.build();
         	final KafkaStreams streams = new KafkaStreams(topology, props);
