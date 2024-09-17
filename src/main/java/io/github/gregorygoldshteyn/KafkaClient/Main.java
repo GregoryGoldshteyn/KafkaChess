@@ -1,7 +1,9 @@
 package io.github.gregorygoldshteyn.kafka.chess.client;
 
 import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
@@ -25,6 +27,9 @@ public class Main{
         	props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         	props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
         	props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());
+        	
+		props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, new StringSerializer().getClass());
+        	props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, new StringSerializer().getClass());
 		return props;
 	}
 
@@ -39,6 +44,8 @@ public class Main{
 		final ArrayList<Game> games = new ArrayList<Game>();
 		final Properties props = initProperties();	
 		final ClientProducer clientProducer = new ClientProducer(props, playerInput, playerID);
+
+		games.add(new Game("2"));
 
 		KStream<String, String> serverOutputStream = builder.<String, String>stream(serverOutput)
 			.filter(new Predicate<String, String>(){
