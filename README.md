@@ -12,4 +12,13 @@ A small app for learning more about Apache Kafka
 Kafka stores data as byte arrays. To reduce message size, the minimal number of bytes required to represent a chess position should be used. The most popular minimal representation of the chess board is the bitboard + piece info. The implementation is as follows:
 - The board is represented by 64 bits with a 1 indicating a piece is on the square and a 0 an empty square.
 - A list of the pieces at each position with each peice type (and color) represented by 4 bits
+
 With 32 pieces, 16 bytes are required on a full board. Every 2 captures, one fewer byte is required. At 3 pieces remaining (the minimal required for the game to continue) a game state only requires 10 bytes. Additionally, since 12 pieces use 4 bits, there are 4 open slots, which can be used for castling information on the rooks and kings.
+
+Another possiblity is huffman encoding
+- 1 bit represents an empty space
+- 3 bits for each pawn
+- 5 bits for knights and bishops
+- 6 bits for rooks, kings, and queens
+
+Which also adds up to 192 bits or 24 bytes in total, and could save space in pawn heavy endgames, but is more complicated than the bitboard for no additional space savings.
