@@ -228,7 +228,7 @@ public class Game{
 	}
 
 	public boolean isLegalRookMove(int startCol, int startRow, int endCol, int endRow){
-		if(!isOrthogonalMove(startCol, startRow, endCol, endRow){
+		if(!isOrthogonalMove(startCol, startRow, endCol, endRow)){
 			return false;
 		}
 
@@ -300,9 +300,8 @@ public class Game{
 		return true;
 	}
 
-
 	public boolean isLegalKnightMove(int startCol, int startRow, int endCol, int endRow){
-		if(!isKnightMove(startCol, startRow, endCol, endRow){
+		if(!isKnightMove(startCol, startRow, endCol, endRow)){
 			return false;
 		}
 
