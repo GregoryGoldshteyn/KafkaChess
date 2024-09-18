@@ -35,6 +35,34 @@ public class Game{
 		public static final String BLACK_PAWN = "p";
 
 		public static final String EMPTY = " ";
+
+		public static boolean isWhitePiece(String piece){
+			if(piece.equals(WHITE_KING) || 
+				piece.equals(WHITE_QUEEN) ||
+				piece.equals(WHITE_BISHOP) ||
+				piece.equals(WHITE_KNIGHT) ||
+				piece.equals(WHITE_ROOK_CAN_CASTLE) ||
+				piece.equals(WHITE_ROOK_CANNOT_CASTLE) ||
+				piece.equals(WHITE_PAWN))
+			{
+				return true;
+			}
+
+			return false;
+		}
+
+		public static boolean isBlackPiece(String piece){
+			if(piece.equals(EMPTY)){
+				return false;
+			}
+
+			if(isWhitePiece(piece)){
+				return false;
+			}
+
+			return true;
+		}
+
 	}
 	
 	// Game starts with white's turn
@@ -130,6 +158,66 @@ public class Game{
 
 	public void logBoard(){
 		logBoard(false, false);
+	}
+
+	public boolean isOnBoard(int col, int row){
+		return col < 8 && col >= 0 && row < 8 && row >= 0;
+	}
+
+	public boolean isMoveOnBoard(int startCol, int startRow, int endCol, int endRow){	
+		return isOnBoard(startCol, startRow) && isOnBoard(endCol, endRow);
+	}
+
+	public boolean isOrthogonalMove(int startCol, int startRow, int endCol, int endRow){
+		if(!isMoveOnBoard(startCol, startRow, endCol, endRow)){
+			return false;
+		}
+
+		if(startCol == endCol && startRow != endRow){
+			return true;
+		}
+
+		if(startRow == endRow && startCol != endCol){
+			return true;
+		}
+
+		return false;
+	}
+
+	public boolean isDiagonalMove(int startCol, int startRow, int endCol, int endRow){	
+		if(!isMoveOnBoard(startCol, startRow, endCol, endRow)){
+			return false;
+		}
+
+		if(startCol - endCol == startRow - endRow){
+			return true;
+		}
+
+		if(startCol - endCol == (startRow - endRow) * -1){
+			return true;
+		}
+
+		return false;
+	}
+
+	public boolean isKnightMove(int startCol, int startRow, int endCol, int endRow){
+		if(!isMoveOnBoard(startCol, startRow, endCol, endRow)){
+			return false;
+		}
+
+		if(startCol - endCol == 2 || startCol - endCol == -2){
+			if(startRow - endRow == 1 || startRow - endRow == -1){
+				return true;
+			}
+		}
+
+		if(startCol - endCol == 1 || startCol - endCol == -1){
+			if(startRow - endRow == 2 || startRow - endRow == -2){
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	public static Game generateNewGame(){
