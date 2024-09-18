@@ -227,6 +227,26 @@ public class Game{
 		return false;
 	}
 
+	public boolean isLegalKingMove(int startCol, int startRow, int endCol, int endRow){
+		if(!isMoveOnBoard(startCol, startRow, endCol, endRow){
+			return false;
+		}
+
+	public boolean canCastle(int startRow, int endCol){
+		if(startRow != 0 && startRow != 7){
+			return false;
+		}
+		
+		if(endCol != 0 && endCol != 7){
+			return false;
+		}
+
+		String castleRook = startRow == 0 ? 
+			Piece.WHITE_ROOK_CAN_CASTLE : 
+			Piece.BLACK_ROOK_CAN_CASTLE;
+	
+	}
+
 	public boolean isLegalQueenMove(int startCol, int startRow, int endCol, int endRow){
 		return isLegalRookMove(startCol, startRow, endCol, endRow) ||
 			isLegalBishopMove(startCol, startRow, endCol, endRow);
