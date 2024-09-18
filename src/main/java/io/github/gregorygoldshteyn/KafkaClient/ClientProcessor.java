@@ -13,7 +13,7 @@ public class ClientProcessor implements Processor<String, String, String, String
 	private System.Logger logger;
 	
 	public ClientProcessor(){
-		logger = System.getLogger("ClientProcessorSystem.Logger");
+		logger = System.getLogger("ClientProcessorLogger");
 	}
 	
 	public void parseServerCommand(String serverMessage){
@@ -97,7 +97,6 @@ public class ClientProcessor implements Processor<String, String, String, String
 	}
 
 	public void process(Record<String, String> record){
-		logger.log(System.Logger.Level.INFO, "process called with: " + record.value());
 		parseServerCommand(record.value());
 	}
 }

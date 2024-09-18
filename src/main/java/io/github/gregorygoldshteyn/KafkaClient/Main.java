@@ -34,9 +34,12 @@ public class Main{
 	}
 
 	public static void main(String[] args){
-		String playerID = "testId";
+		final String playerID = "ID";
+
+		// If program is called with an arg, use it as the ID
+		// Required for testing with multiple clients
 		if(args.length > 0){
-			playerID = args[0];
+			playerID.concat(args[0]);
 		}
 		final String serverOutput = "streams-server-output";
 		final String playerInput = "streams-player-input";
@@ -51,6 +54,9 @@ public class Main{
 			.filter(new Predicate<String, String>(){
 					@Override
 				 	public boolean test(String k, String v){
+						if(k.equals(playerID)){
+							return true;
+						}
 						for(Game game : games){
 							if(k.equals(game.gameID)){
 								return true;
