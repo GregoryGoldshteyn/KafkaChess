@@ -165,7 +165,14 @@ public class Game{
 	}
 
 	public boolean isMoveOnBoard(int startCol, int startRow, int endCol, int endRow){	
-		return isOnBoard(startCol, startRow) && isOnBoard(endCol, endRow);
+		if(!isOnBoard(startCol, startRow) || !isOnBoard(endCol, endRow)){
+			return false;
+		}
+		if(startCol - endCol == 0 && startRow - endRow == 0){
+			return false;
+		}
+
+		return true;
 	}
 
 	public boolean isOrthogonalMove(int startCol, int startRow, int endCol, int endRow){
@@ -219,6 +226,104 @@ public class Game{
 
 		return false;
 	}
+
+	public boolean isLegalRookMove(int startCol, int startRow, int endCol, int endRow){
+		if(!isOrthogonalMove(startCol, startRow, endCol, endRow){
+			return false;
+		}
+
+		if(!willNotTakeFriendlyPiece(startCol, startRow, endCol, endRow)){
+			return false;
+		}
+		
+		// Moving along columns (left to right from a player perspective)
+		int delta = endCol - startCol;
+
+		// Moving along rows (up and down from a player perspective)
+		if(delta == 0){
+			delta = endRow - startRow;
+			if(delta > 0){
+				for(int checkRow = startRow + 1; checkRow < endRow; checkRow+=1){
+					if(!boardState[endCol][checkRow].equals(Piece.EMPTY)){
+						return false;
+					}
+				}
+			}
+			else{
+				for(int checkRow = startRow - 1; checkRow > endRow; checkRow-=1){
+					if(!boardState[endCol][checkRow].equals(Piece.EMPTY)){
+						return false;
+					}
+				}
+			}
+		}
+		else{
+			if(delta > 0){
+				for(int checkCol = startCol + 1; checkCol < endCol; checkCol+=1){
+					if(!boardState[checkCol][endRow].equals(Piece.EMPTY)){
+						return false;
+					}
+				}
+			}
+			else{
+				for(int checkCol = startCol - 1; checkCol > endCol; checkCol-=1){
+					if(!boardState[checkCol][endRow].equals(Piece.EMPTY)){
+						return false;
+					}
+				}
+			}
+		}
+
+		return true;
+	}
+
+	public boolean isLegalBishopMove(int startCol, int startRow, int endCol, int endRow){
+		if(!isDiagonalMove(startCol, startRow, endCol, endRow)){
+			return false;
+		}
+
+		if(!willNotTakeFriendlyPiece(startCol, startRow, endCol, endRow)){
+			return false;
+		}
+
+		int dCol = endCol - startCol > 0 ? 1 : -1;
+		int dRow = endRow - startRow > 0 ? 1 : -1;
+
+		for(int checkCol = startCol + dCol, checkRow = startRow + dRow;
+				checkCol != endCol;
+				checkCol += dCol, checkRow += dRow){
+			if(!boardState[checkCol][checkRow].equals(Piece.EMPTY)){
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+
+	public boolean isLegalKnightMove(int startCol, int startRow, int endCol, int endRow){
+		if(!isKnightMove(startCol, startRow, endCol, endRow){
+			return false;
+		}
+
+		return willNotTakeFriendlyPiece(startCol, startRow, endCol, endRow);
+	}
+
+	// If the end sqaure is empty or an enemy peice
+	public boolean willNotTakeFriendlyPiece(int startCol, int startRow, int endCol, int endRow){
+		if(Piece.isWhitePiece(boardState[startCol][startRow]) && 
+			!Piece.isWhitePiece(boardState[endCol][endRow])){
+			return true;
+		}
+
+		if(Piece.isBlackPiece(boardState[startCol][startRow]) && 
+			!Piece.isBlackPiece(boardState[endCol][endRow])){
+			return true;
+		}
+
+		return false;
+	}
+
 
 	public static Game generateNewGame(){
 		return new Game(UUID.randomUUID().toString());
