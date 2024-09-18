@@ -227,6 +227,11 @@ public class Game{
 		return false;
 	}
 
+	public boolean isLegalQueenMove(int startCol, int startRow, int endCol, int endRow){
+		return isLegalRookMove(startCol, startRow, endCol, endRow) ||
+			isLegalBishopMove(startCol, startRow, endCol, endRow);
+	}
+
 	public boolean isLegalRookMove(int startCol, int startRow, int endCol, int endRow){
 		if(!isOrthogonalMove(startCol, startRow, endCol, endRow)){
 			return false;
