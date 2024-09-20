@@ -228,9 +228,27 @@ public class Game{
 	}
 
 	public boolean isLegalKingMove(int startCol, int startRow, int endCol, int endRow){
-		if(!isMoveOnBoard(startCol, startRow, endCol, endRow){
+		if(!isMoveOnBoard(startCol, startRow, endCol, endRow)){
 			return false;
 		}
+
+		// Check castling
+		if(startRow == endRow && canCastle(startRow, endCol)){
+			return true;
+		}
+
+		// A king can only move 1 row and column in one move...
+		if(startCol - endCol > 1 || startCol - endCol < -1){
+			return false;
+		}
+
+		if(startRow - endRow > 1 || startRow - endRow < -1){
+			return false;
+		}
+
+		// ... but it can move as a queen for that move
+		return isLegalQueenMove(startCol, startRow, endCol, endRow);
+	}
 
 	public boolean canCastle(int kingRow, int rookCol){
 		// A king can only castle if it has not moved
@@ -294,7 +312,7 @@ public class Game{
 
 	public boolean isKingInCheckByAnyPiece(int kingCol, int kingRow, boolean isWhiteKing){
 		for(int col = 0; col < 7; col += 1){
-			for int row = 0; row < 7; row += 1){
+			for(int row = 0; row < 7; row += 1){
 				if(isKingInCheckByPiece(kingCol, kingRow, col, row, isWhiteKing)){
 					return true;
 				}
@@ -341,7 +359,7 @@ public class Game{
 			case Piece.WHITE_ROOK_CAN_CASTLE:
 			case Piece.WHITE_ROOK_CANNOT_CASTLE:
 			case Piece.BLACK_ROOK_CAN_CASTLE:
-			case Piece.BLACK_ROOK_CAN_CASTLE:
+			case Piece.BLACK_ROOK_CANNOT_CASTLE:
 				return isLegalRookMove(startCol, startRow, endCol, endRow);
 			case Piece.WHITE_KNIGHT:
 			case Piece.BLACK_KNIGHT:
@@ -361,9 +379,6 @@ public class Game{
 			default:
 				return false;
 		}
-
-		// Should not get here, but just in case
-		return false;
 	}
 
 	public boolean isLegalQueenMove(int startCol, int startRow, int endCol, int endRow){
