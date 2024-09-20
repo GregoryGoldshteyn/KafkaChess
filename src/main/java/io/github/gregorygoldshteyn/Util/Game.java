@@ -232,24 +232,148 @@ public class Game{
 			return false;
 		}
 
-	public boolean canCastle(int startRow, int endCol){
-		if(startRow != 0 && startRow != 7){
+	public boolean canCastle(int kingRow, int rookCol){
+		// A king can only castle if it has not moved
+		if(kingRow != 0 && kingRow != 7){
 			return false;
 		}
 		
-		if(endCol != 0 && endCol != 7){
+		// A king can only castle with a rook that has not moved
+		if(rookCol != 0 && rookCol != 7){
 			return false;
 		}
 
-		String castleRook = startRow == 0 ? 
-			Piece.WHITE_ROOK_CAN_CASTLE : 
+		String castleRook = kingRow == 0 ? 
+			Piece.WHITE_ROOK_CAN_CASTLE :
 			Piece.BLACK_ROOK_CAN_CASTLE;
+
+		if(!castleRook.equals(boardState[rookCol][kingRow])){
+			return false;
+		}
+
+		// A king can only castle if it would not be in check
+		// at any point during castling
+		// These are the two squares toward either rook
+		// The squares between the king and rook must also be empty
+		boolean isWhiteKing = kingRow == 0;
+		
+		if(rookCol == 0){
+			if(isKingInCheckByAnyPiece(3, kingRow, isWhiteKing)){
+				return false;
+			}
+			if(isKingInCheckByAnyPiece(2, kingRow, isWhiteKing)){
+				return false;
+			}
+			if(Piece.EMPTY.equals(boardState[3][kingRow])){
+				return false;
+			}
+			if(Piece.EMPTY.equals(boardState[2][kingRow])){
+				return false;
+			}
+			if(Piece.EMPTY.equals(boardState[1][kingRow])){
+				return false;
+			}
+		}
+		else{
+			if(isKingInCheckByAnyPiece(5, kingRow, isWhiteKing)){
+				return false;
+			}
+			if(isKingInCheckByAnyPiece(6, kingRow, isWhiteKing)){
+				return false;
+			}
+			if(Piece.EMPTY.equals(boardState[5][kingRow])){
+				return false;
+			}
+			if(Piece.EMPTY.equals(boardState[6][kingRow])){
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	public boolean isKingInCheckByAnyPiece(int kingCol, int kingRow, boolean isWhiteKing){
+		for(int col = 0; col < 7; col += 1){
+			for int row = 0; row < 7; row += 1){
+				if(isKingInCheckByPiece(kingCol, kingRow, col, row, isWhiteKing)){
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
 	
+	// The "isWhiteKing" value is important for checking empty squares when castling
+	public boolean isKingInCheckByPiece(int kingCol, int kingRow, 
+			int pieceCol, int pieceRow, 
+			boolean isWhiteKing){
+		String previousPiece = boardState[kingCol][kingRow];
+		if(isWhiteKing){
+			if(!Piece.isBlackPiece(boardState[pieceCol][pieceRow])){
+				return false;
+			}
+			
+			boardState[kingCol][kingRow] = Piece.WHITE_KING;
+			if(isLegalPieceMove(pieceCol, pieceRow, kingCol, kingRow)){
+				boardState[kingCol][kingRow] = previousPiece;
+				return true;
+			}
+		}
+		else{
+			if(!Piece.isWhitePiece(boardState[pieceCol][pieceRow])){
+				return false;
+			}
+
+			boardState[kingCol][kingRow] = Piece.BLACK_KING;
+			if(isLegalPieceMove(pieceCol, pieceRow, kingCol, kingRow)){
+				boardState[kingCol][kingRow] = previousPiece;
+				return true;
+			}
+		}
+
+		boardState[kingCol][kingRow] = previousPiece;
+		return false;
+	}
+
+	public boolean isLegalPieceMove(int startCol, int startRow, int endCol, int endRow){
+		switch(boardState[startCol][startRow]){
+			case Piece.WHITE_ROOK_CAN_CASTLE:
+			case Piece.WHITE_ROOK_CANNOT_CASTLE:
+			case Piece.BLACK_ROOK_CAN_CASTLE:
+			case Piece.BLACK_ROOK_CAN_CASTLE:
+				return isLegalRookMove(startCol, startRow, endCol, endRow);
+			case Piece.WHITE_KNIGHT:
+			case Piece.BLACK_KNIGHT:
+				return isLegalKnightMove(startCol, startRow, endCol, endRow);
+			case Piece.WHITE_BISHOP:
+			case Piece.BLACK_BISHOP:
+				return isLegalBishopMove(startCol, startRow, endCol, endRow);
+			case Piece.WHITE_QUEEN:
+			case Piece.BLACK_QUEEN:
+				return isLegalQueenMove(startCol, startRow, endCol, endRow);
+			case Piece.WHITE_KING:
+			case Piece.BLACK_KING:
+				return isLegalKingMove(startCol, startRow, endCol, endRow);
+			case Piece.WHITE_PAWN:
+			case Piece.BLACK_PAWN:
+				return isLegalPawnMove(startCol, startRow, endCol, endRow);
+			default:
+				return false;
+		}
+
+		// Should not get here, but just in case
+		return false;
 	}
 
 	public boolean isLegalQueenMove(int startCol, int startRow, int endCol, int endRow){
 		return isLegalRookMove(startCol, startRow, endCol, endRow) ||
 			isLegalBishopMove(startCol, startRow, endCol, endRow);
+	}
+
+	public boolean isLegalPawnMove(int startCol, int startRow, int endCol, int endRow){
+		// TODO
+		return false;
 	}
 
 	public boolean isLegalRookMove(int startCol, int startRow, int endCol, int endRow){
