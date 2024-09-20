@@ -18,6 +18,10 @@ public class Game{
 	// Implementation of a bitboard would be similar
 	// But use bytes instead of strings
 	public static class Piece{
+		// The total number of pieces should be 16 or fewer
+		// This is to implement bitboard storage with fewest bytes
+		// This is plenty for the 12 pieces of chess and the 2 special cases
+		// in each color (castling, en passant)
 		public static final String WHITE_KING = "K";
 		public static final String WHITE_QUEEN = "Q";
 		public static final String WHITE_BISHOP = "B";
@@ -25,6 +29,7 @@ public class Game{
 		public static final String WHITE_ROOK_CAN_CASTLE = "C";
 		public static final String WHITE_ROOK_CANNOT_CASTLE = "R";
 		public static final String WHITE_PAWN = "P";
+		public static final String WHITE_PAWN_EN_PASSANT = "E";
 
 		public static final String BLACK_KING = "k";
 		public static final String BLACK_QUEEN = "q";
@@ -33,6 +38,7 @@ public class Game{
 		public static final String BLACK_ROOK_CAN_CASTLE = "c";
 		public static final String BLACK_ROOK_CANNOT_CASTLE = "r";
 		public static final String BLACK_PAWN = "p";
+		public static final String BLACK_PAWN_EN_PASSANT = "e";
 
 		public static final String EMPTY = " ";
 
@@ -75,6 +81,55 @@ public class Game{
 		initBoard();
 
 		logBoard(true, true);
+	}
+
+	public boolean makeMove(int startCol, int startRow, int endCol, int endRow){
+		// White can only move white pieces
+		if(whiteTurn){
+			if(!Piece.isWhitePiece(boardState[startCol][startRow])){
+				return false;
+			}
+		}
+
+		// Black can only move black pieces
+		else{
+			if(!Piece.isBlackPiece(boardState[startCol][startRow])){
+				return false;
+			}
+		}
+		
+		// Can the peice at the location actually make that move
+		if(!isLegalPieceMove(startCol, startRow, endCol, endRow)){
+			return false;
+		}
+
+		return true;
+	}
+
+	public boolean willKingNotBeInCheck(int startCol, int startRow, int endCol, int endRow){
+		String[][] nextState = getCopyOfBoardState();
+
+		nextState[endCol][endRow] = nextState[startCol][startRow];
+		nextState[startCol][startRow] = Piece.EMPTY;
+
+		if(isKingInCheckByAnyPiece(this.whiteTurn, nextState)){
+			return false;
+		}
+
+		return true;
+	}
+
+
+	public String[][] getCopyOfBoardState(){
+		String[][] retState = new String[8][8];
+
+		for(int col = 0; col < 8; col += 1){
+			for(int row = 0; row < 8; row += 1){
+				retState[col][row] = boardState[col][row];
+			}
+		}
+
+		return retState;
 	}
 	
 	// A chessboard is labled with letters on the columns and numbers on the rows
@@ -310,10 +365,34 @@ public class Game{
 		return true;
 	}
 
+	public boolean isKingInCheckByAnyPiece(boolean isWhiteKing, String[][] boardState){
+		for(int col = 0; col < 8; col += 1){
+			for(int row = 0; row < 8; row += 1){
+				if(boardState[col][row].equals(Piece.WHITE_KING) &&
+						isWhiteKing){
+					return isKingInCheckByAnyPiece(col, row, 
+							isWhiteKing, boardState);
+				}
+				if(boardState[col][row].equals(Piece.BLACK_KING) &&
+						!isWhiteKing){
+					return isKingInCheckByAnyPiece(col, row, 
+							isWhiteKing, boardState);
+				}
+			}
+		}
+
+		return false;
+	}
+
 	public boolean isKingInCheckByAnyPiece(int kingCol, int kingRow, boolean isWhiteKing){
+		return isKingInCheckByAnyPiece(kingCol, kingRow, isWhiteKing, this.boardState);
+	}
+
+	public boolean isKingInCheckByAnyPiece(int kingCol, int kingRow,
+			boolean isWhiteKing, String[][] boardState){
 		for(int col = 0; col < 7; col += 1){
 			for(int row = 0; row < 7; row += 1){
-				if(isKingInCheckByPiece(kingCol, kingRow, col, row, isWhiteKing)){
+				if(isKingInCheckByPiece(kingCol, kingRow, col, row, isWhiteKing, boardState)){
 					return true;
 				}
 			}
@@ -325,7 +404,7 @@ public class Game{
 	// The "isWhiteKing" value is important for checking empty squares when castling
 	public boolean isKingInCheckByPiece(int kingCol, int kingRow, 
 			int pieceCol, int pieceRow, 
-			boolean isWhiteKing){
+			boolean isWhiteKing, String[][] boardState){
 		String previousPiece = boardState[kingCol][kingRow];
 		if(isWhiteKing){
 			if(!Piece.isBlackPiece(boardState[pieceCol][pieceRow])){
@@ -387,8 +466,109 @@ public class Game{
 	}
 
 	public boolean isLegalPawnMove(int startCol, int startRow, int endCol, int endRow){
-		// TODO
-		return false;
+		if(!isMoveOnBoard(startCol, startRow, endCol, endRow)){
+			return false;
+		}
+
+		// Unlike other pieces, pawns can only move in one direction based on their color
+		// White pawns move "right" (row increasing) and black pawns move "left" (row decreasing)
+		boolean whitePawn = boardState[startCol][startRow].equals(Piece.WHITE_PAWN);
+		boolean isAttack = false;
+
+		// A pawn can only attack one column over
+		if(startCol - endCol > 1 || startCol - endCol < -1){
+			return false;
+		}
+
+		// A move is on the same column. An attack would target another column
+		if(startCol != endCol){
+			isAttack = true;
+		}
+
+		if(whitePawn){
+			// A pawn must move forward in moving or attacking
+			if(endRow - startRow < 1){
+				return false;
+			}
+
+			if(isAttack){
+				// There are two possible pawn captures
+				// One is the standard diagonal capture
+				// The other is en passant
+				if(!Piece.isBlackPiece(boardState[endCol][endRow]) && 
+					!Piece.BLACK_PAWN_EN_PASSANT.equals(
+						boardState[endCol][startRow])){
+					return false;
+				}
+			}
+			
+			else{
+				// Whether a pawn moves 1 sqaure or two the space in front
+				// of the pawn must be empty to move forward
+				if(!Piece.EMPTY.equals(boardState[endCol][startRow+1])){
+					return false;
+				}
+				
+				// A pawn can never move 3 or more squares
+				if(endRow - startRow > 2)
+				{
+					return false;
+				}
+
+				// On a pawn's first move, it may move two squares
+				if(endRow - startRow == 2){
+					if(startRow != 1){
+						return false;
+					}
+					if(!Piece.EMPTY.equals(boardState[endCol][startRow+2])){
+						return false;
+					}
+				}
+			}
+		}
+		else {
+			// A pawn must move forward in moving or attacking
+			if(endRow - startRow > -1){
+				return false;
+			}
+
+			if(isAttack){
+				// There are two possible pawn captures
+				// One is the standard diagonal capture
+				// The other is en passant
+				if(!Piece.isWhitePiece(boardState[endCol][endRow]) && 
+					!Piece.WHITE_PAWN_EN_PASSANT.equals(
+						boardState[endCol][startRow])){
+					return false;
+				}
+			}
+			
+			else{
+				// Whether a pawn moves 1 sqaure or two the space in front
+				// of the pawn must be empty to move forward
+				if(!Piece.EMPTY.equals(boardState[endCol][startRow-1])){
+					return false;
+				}
+				
+				// A pawn can never move 3 or more squares
+				if(endRow - startRow < -2)
+				{
+					return false;
+				}
+
+				// On a pawn's first move, it may move two squares
+				if(endRow - startRow == -2){
+					if(startRow != 6){
+						return false;
+					}
+					if(!Piece.EMPTY.equals(boardState[endCol][startRow-2])){
+						return false;
+					}
+				}
+			}
+		}
+
+		return willKingNotBeInCheck(startRow, startCol, endRow, endCol);
 	}
 
 	public boolean isLegalRookMove(int startCol, int startRow, int endCol, int endRow){
@@ -438,7 +618,7 @@ public class Game{
 			}
 		}
 
-		return true;
+		return willKingNotBeInCheck(startRow, startCol, endRow, endCol);
 	}
 
 	public boolean isLegalBishopMove(int startCol, int startRow, int endCol, int endRow){
@@ -461,7 +641,7 @@ public class Game{
 			}
 		}
 
-		return true;
+		return willKingNotBeInCheck(startRow, startCol, endRow, endCol);
 	}
 
 	public boolean isLegalKnightMove(int startCol, int startRow, int endCol, int endRow){
@@ -469,7 +649,11 @@ public class Game{
 			return false;
 		}
 
-		return willNotTakeFriendlyPiece(startCol, startRow, endCol, endRow);
+		if(!willNotTakeFriendlyPiece(startCol, startRow, endCol, endRow)){
+			return false;
+		}
+
+		return willKingNotBeInCheck(startRow, startCol, endRow, endCol);
 	}
 
 	// If the end sqaure is empty or an enemy peice
